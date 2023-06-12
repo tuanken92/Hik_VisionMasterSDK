@@ -48,6 +48,8 @@
             this.listBoxMsg = new System.Windows.Forms.ListBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.vmProcedureConfigControl1 = new VMControls.Winform.Release.VmProcedureConfigControl();
+            this.btnRunOnce = new System.Windows.Forms.Button();
+            this.btnRunContinuous = new System.Windows.Forms.Button();
             this.groupBoxSolution.SuspendLayout();
             this.groupBoxMsg.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -66,6 +68,8 @@
             this.groupBoxSolution.Controls.Add(this.label8);
             this.groupBoxSolution.Controls.Add(this.textBoxPassword);
             this.groupBoxSolution.Controls.Add(this.buttonCloseSolution);
+            this.groupBoxSolution.Controls.Add(this.btnRunContinuous);
+            this.groupBoxSolution.Controls.Add(this.btnRunOnce);
             this.groupBoxSolution.Controls.Add(this.buttonLoadSolution);
             this.groupBoxSolution.Controls.Add(this.buttonSaveSolution);
             this.groupBoxSolution.Controls.Add(this.label11);
@@ -268,6 +272,28 @@
             this.vmProcedureConfigControl1.TabIndex = 0;
 // TODO: Code generation for '' failed because of Exception 'Invalid Primitive Type: System.IntPtr. Consider using CodeObjectCreateExpression.'.
             // 
+            // btnRunOnce
+            // 
+            this.btnRunOnce.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.btnRunOnce.Location = new System.Drawing.Point(177, 137);
+            this.btnRunOnce.Name = "btnRunOnce";
+            this.btnRunOnce.Size = new System.Drawing.Size(111, 30);
+            this.btnRunOnce.TabIndex = 15;
+            this.btnRunOnce.Text = "Run";
+            this.btnRunOnce.UseVisualStyleBackColor = true;
+            this.btnRunOnce.Click += new System.EventHandler(this.btnRunOnce_Click);
+            // 
+            // btnRunContinuous
+            // 
+            this.btnRunContinuous.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.btnRunContinuous.Location = new System.Drawing.Point(177, 193);
+            this.btnRunContinuous.Name = "btnRunContinuous";
+            this.btnRunContinuous.Size = new System.Drawing.Size(111, 30);
+            this.btnRunContinuous.TabIndex = 15;
+            this.btnRunContinuous.Text = "Run Continuous";
+            this.btnRunContinuous.UseVisualStyleBackColor = true;
+            this.btnRunContinuous.Click += new System.EventHandler(this.btnRunContinuous_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -312,6 +338,8 @@
         private System.Windows.Forms.ListBox listBoxMsg;
         private System.Windows.Forms.GroupBox groupBox1;
         private VMControls.Winform.Release.VmProcedureConfigControl vmProcedureConfigControl1;
+        private System.Windows.Forms.Button btnRunOnce;
+        private System.Windows.Forms.Button btnRunContinuous;
     }
 }
 

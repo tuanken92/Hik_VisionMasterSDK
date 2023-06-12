@@ -15,6 +15,7 @@ namespace SolutionControl
     public partial class Form1 : Form
     {
         bool mSolutionIsLoad = false;  //true 代表方案加载成功，false 代表方案关闭
+        List<VmProcedure> processList;
 
         public Form1()
         {
@@ -66,7 +67,9 @@ namespace SolutionControl
 
             try
             {
-                VmSolution.Import(textBoxSolutionPath.Text, textBoxPassword.Text);
+                VmSolution.Load(textBoxSolutionPath.Text, textBoxPassword.Text);
+                processList = GetCurrentSolProcedureList();
+                RegisterProcedureWorkEndCallback(processList);
                 mSolutionIsLoad = true;
             }
             catch (VmException ex)
@@ -87,6 +90,109 @@ namespace SolutionControl
             progressBarSaveAndLoad.Value = Convert.ToInt32(nProgress);
         }
 
+
+        private List<VmProcedure> GetCurrentSolProcedureList()
+        {
+            List<VmProcedure> procedureList = new List<VmProcedure>();
+            var processInfoList = VmSolution.Instance.GetAllProcedureList();
+            for (int i = 0; i < processInfoList.nNum; i++)
+            {
+                string processName = processInfoList.astProcessInfo[i].strProcessName;
+                procedureList.Add((VmProcedure)VmSolution.Instance[processName]);
+                Console.WriteLine(processName);
+            }
+            return procedureList;
+        }
+
+
+        public void RegisterProcedureWorkEndCallback(List<VmProcedure> lst)
+        {
+            try
+            {
+                foreach (var vmProcedure in processList)
+                {
+                    vmProcedure.OnWorkEndStatusCallBack += VmProcedure_OnWorkEndStatusCallBack;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void VmProcedure_OnWorkEndStatusCallBack(object sender, EventArgs e)
+        {
+            try
+            {
+                VmProcedure procedure = sender as VmProcedure;
+                if (procedure != null)
+                {
+                    var outputList = procedure.ModuResult.GetAllOutputNameInfo();
+                    bool outputConfigIsWrong = true;
+                    //获取流程输出配置中为out的输出项
+                    foreach (var ioNameInfo in outputList)
+                    {
+                        Console.WriteLine(ioNameInfo.Name);
+                        Console.WriteLine(ioNameInfo.TypeName);
+                        var result = procedure.ModuResult.GetOutputPointArray(ioNameInfo.Name);
+                        if (result != null)
+                        {
+                            foreach(var io in result)
+                            {
+                                Console.WriteLine($"data = {io.X}, {io.Y}");
+                            }    
+                        }    
+                        //if (ioNameInfo.Name == "out" &&
+                        //    ioNameInfo.TypeName == IMVS_MODULE_BASE_DATA_TYPE.IMVS_GRAP_TYPE_STRING)
+                        //{
+                        //    var result = procedure.ModuResult.GetOutputString(ioNameInfo.Name);
+                        //    string resultStrValue = result.astStringVal[0].strValue;
+                        //    AppendLog("流程结果:" + resultStrValue);
+                        //    UpdateResultListBox("流程结果:" + resultStrValue);
+                        //    UpdateLableState(resultStrValue);
+                        //    outputConfigIsWrong = false;
+                        //}
+                    }
+                    //流程输出配置有误，提示输出配置错误
+                    if (outputConfigIsWrong)
+                    {
+                        Console.WriteLine("outputConfigIsWrong");
+                    }
+                    Console.WriteLine("Time process: " + procedure.ProcessTime);
+
+
+                    var outputImage = procedure.ModuResult.GetOutputImageV2("ImageData");
+                    if (outputImage != null)
+                    {
+                        try
+                        {
+                            var w = outputImage.Width;
+                            var h = outputImage.Height;
+                            var l = outputImage.DataLen;
+                            var type = outputImage.Pixelformat;
+                            var stride = type == VMPixelFormat.VM_PIXEL_MONO_08 ? w : w * 3;
+                            var format = type == VMPixelFormat.VM_PIXEL_MONO_08 ?
+                                                                    System.Drawing.Imaging.PixelFormat.Format8bppIndexed
+                                                                    : System.Drawing.Imaging.PixelFormat.Format24bppRgb;
+
+                            Bitmap bitmap = new Bitmap(w, h, stride, format, outputImage.ImageData);
+                            bitmap.Save(@"D:\Hik\abc.bmp");
+
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
+                    }    
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+
         /****************************************************************************
          * @fn           保存方案
          * @fn           Save solution
@@ -103,7 +209,7 @@ namespace SolutionControl
             {                
                 try
                 {
-                    VmSolution.Export(textBoxSolutionPath.Text, textBoxPassword.Text);
+                    VmSolution.SaveAs(textBoxSolutionPath.Text, textBoxPassword.Text);
                 }
                 catch (VmException ex)
                 {
@@ -276,6 +382,39 @@ namespace SolutionControl
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             VmSolution.Instance?.Dispose();
+        }
+
+        private void btnRunOnce_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                    VmProcedure procedure = VmSolution.Instance[processName] as VmProcedure;
+                    if (procedure != null)
+                    {
+                        procedure.Run();
+                    }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        string processName = "Blob-Tape";
+        private void btnRunContinuous_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                    VmProcedure procedure = VmSolution.Instance[processName] as VmProcedure;
+                    if (procedure != null)
+                    {
+                        procedure.ContinuousRunEnable = procedure.ContinuousRunEnable ^ true;
+                    }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
     }
 }
